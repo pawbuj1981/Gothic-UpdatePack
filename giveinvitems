@@ -1,0 +1,158 @@
+// Bidschrimausgabe beim storybedingten Transfer von Items
+const string _STR_MESSAGE_ITEM_GIVEN		= "Oddałeś - "								;	//SPACE davor wichtig, weil Trennzeichen
+const string _STR_MESSAGE_ITEMS_GIVEN		= "Oddane - "							;
+const string _STR_MESSAGE_ORE_GIVEN			= "Bryłki oddane "									;
+const string _STR_MESSAGE_ITEM_TAKEN		= "Otrzymałeś - "							;
+const string _STR_MESSAGE_ITEMS_TAKEN		= "Otrzymane - "							;
+const string _STR_MESSAGE_ORE_TAKEN			= "Bryłki odebrane "									;
+	//////////////////////////////////////////////////////////////////////////
+//	B_GiveInvItems
+//	==============
+//	Übergibt ein Item von 'giver' an 'taker' und gibt eine Meldung
+//	auf dem Bildschirm aus.
+//////////////////////////////////////////////////////////////////////////
+var int NINJA_GIVE_INFOBOX;
+func void Ninja_B_GiveInvItems_Hook(var C_NPC giver, var C_NPC taker, var int itemInstance, var int amount)
+{
+	var int col; col = -1; // Stupid pseudo-locals
+	
+	NINJA_GIVE_INFOBOX = STR_ToInt(MEM_GetGothOpt("UPDATEPACK","give_infobox"));//1 
+	if (!MEM_GothOptExists("UPDATEPACK","give_infobox")) {
+        // Add INI-entry, if not set        
+        MEM_SetGothOpt("UPDATEPACK","give_infobox", "1");
+	 };
+	
+	PrintDebugNpc	(PD_ZS_DETAIL,	"B_GiveInvItems");
+	
+	//-------- Gegenstand übertragen --------
+	// ------ Itmes transferieren ------
+	Npc_RemoveInvItems	(giver,	itemInstance,	amount);	
+	CreateInvItems		(taker,	itemInstance,	amount);
+	NPC_GetInvItem	(taker,itemInstance);
+	
+
+	//-------- Meldung ausgeben --------
+	var string msg;
+	var string msg1;
+	var string msg2;
+	var string msg3;
+	var string msg4;
+	
+	var string name;
+	name = item.name;	
+	
+	if	Npc_IsPlayer(giver)
+	{
+		if (itemInstance == ItMiNugget)
+		{
+			msg = ConcatStrings(_STR_MESSAGE_ORE_GIVEN,"(");
+			msg1 = ConcatStrings(msg,IntToString(amount));
+			msg2 = ConcatStrings(msg1," szt.)");
+			//GIVE BOX NEW 
+			if (NINJA_GIVE_INFOBOX)
+			{ 
+			col = -16181;
+			InfoBox(msg2, col);	 	
+			}
+			else 
+			{	
+			PrintScreen	(msg2, -1,_YPOS_MESSAGE_GIVEN,"FONT_OLD_10_WHITE.TGA",_TIME_MESSAGE_GIVEN);	
+			};
+		
+		}
+		else
+		{
+		    if amount == 1
+		    {
+			    name = item.description;
+			    msg = ConcatStrings (_STR_MESSAGE_ITEM_GIVEN ,Item.DESCRIPTION);
+			    //GIVE BOX NEW 
+			if (NINJA_GIVE_INFOBOX)
+			{ 
+				col = -16181;
+				InfoBox(msg, col);	 	
+			}
+			else 
+			{	
+				PrintScreen	(msg, -1,_YPOS_MESSAGE_GIVEN,"FONT_OLD_10_WHITE.TGA",_TIME_MESSAGE_GIVEN);	
+				};		    
+			}   
+			else
+		    {
+			    name = item.description;
+			    msg1 = ConcatStrings (_STR_MESSAGE_ITEM_GIVEN ,Item.DESCRIPTION);
+				msg2 = ConcatStrings (msg1 ," (");
+				msg3 = ConcatStrings (msg2 , IntToString(amount));
+				msg = ConcatStrings (msg3 ," szt.)");
+				    //GIVE BOX NEW 
+			if (NINJA_GIVE_INFOBOX)
+			{ 
+				col = -16181;
+				InfoBox(msg, col);	 	
+			}
+			else 
+			{	
+			    PrintScreen	(msg, -1,_YPOS_MESSAGE_GIVEN,"FONT_OLD_10_WHITE.TGA",_TIME_MESSAGE_GIVEN);
+				}; 
+		    };   
+		};
+	}
+	else if Npc_IsPlayer(taker)
+	{
+		if (itemInstance == ItMiNugget)
+		{
+			
+			msg = ConcatStrings(_STR_MESSAGE_ORE_TAKEN,"(");
+			msg1 = ConcatStrings(msg,IntToString(amount));
+			msg2 = ConcatStrings(msg1," szt.)");
+			//GIVE BOX NEW 
+			if (NINJA_GIVE_INFOBOX)
+			{ 
+				col = Ninja_ColorFocusVobs_Partymember();
+				InfoBox(msg2, col);	 	
+			}
+			else 
+			{	
+			PrintScreen	(msg2, -1,_YPOS_MESSAGE_TAKEN,"FONT_OLD_10_WHITE.TGA",_TIME_MESSAGE_TAKEN);	
+			};			    
+		}
+		else
+		{
+		    if amount == 1
+		    {
+			name = item.description;
+			msg = ConcatStrings (_STR_MESSAGE_ITEM_TAKEN ,Item.DESCRIPTION);
+			//GIVE BOX NEW 
+			if (NINJA_GIVE_INFOBOX)
+			{ 
+				col = Ninja_ColorFocusVobs_Partymember();
+				InfoBox(msg, col);	 	
+			}
+			else 
+			{				    
+			PrintScreen	(msg, -1,_YPOS_MESSAGE_TAKEN,"FONT_OLD_10_WHITE.TGA",_TIME_MESSAGE_TAKEN);
+			};
+			}   
+			else
+		    {
+			name = item.description;
+			msg1 = ConcatStrings (_STR_MESSAGE_ITEM_TAKEN ,Item.DESCRIPTION);
+			msg2 = ConcatStrings (msg1 ," (");
+			msg3 = ConcatStrings (msg2 , IntToString(amount));
+			msg = ConcatStrings (msg3 ," szt.)");
+			//GIVE BOX NEW 
+			if (NINJA_GIVE_INFOBOX)
+			{ 
+				col = Ninja_ColorFocusVobs_Partymember();
+				InfoBox(msg, col);	 	
+			}
+			else 
+			{	
+			PrintScreen	(msg, -1,_YPOS_MESSAGE_TAKEN,"FONT_OLD_10_WHITE.TGA",_TIME_MESSAGE_TAKEN);	
+				};			   
+			}; 
+		};
+	};	
+};
+
+
